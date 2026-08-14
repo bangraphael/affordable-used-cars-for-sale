@@ -42,7 +42,23 @@ textarea{width:100%;height:300px;margin-top:1rem;font-family:monospace;font-size
 <input id="cPrice" placeholder="Price e.g. $2,800">
 <input id="cMileage" placeholder="Mileage e.g. 136,000">
 <input id="cColor" placeholder="Color e.g. White">
-<input id="cImage" placeholder="Image URL">
+<label style="font-weight:bold;">📸 Upload from Phone:</label>
+<input type="file" id="imageFile" accept="image/*" style="margin-bottom:10px;">
+<input type="text" id="imageUrl" placeholder="Image URL (auto-fills after upload)">
+<p id="preview"></p>
+
+<script>
+document.getElementById('imageFile').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    document.getElementById('imageUrl').value = ev.target.result;
+    document.getElementById('preview').innerHTML = '<img src="'+ev.target.result+'" style="width:100%;max-width:300px;border-radius:10px;margin-top:10px;">';
+  };
+  reader.readAsDataURL(file);
+});
+</script>
 <input id="cFeatures" placeholder="Features e.g. Cold AC, Backup Camera">
 <button class="btn btn-green" onclick="addCar()">+ Add Car</button>
 
