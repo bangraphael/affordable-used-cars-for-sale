@@ -1,133 +1,98 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin - Affordable Used Cars</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin - Full Control</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
-body{background:#f1f5f9;padding:1rem}
-.box{max-width:500px;margin:3rem auto;background:white;padding:2rem;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.1)}
-input{width:100%;padding:0.8rem;margin:0.5rem 0;border:1px solid #cbd5e1;border-radius:8px}
-.btn{background:#1e3a8a;color:white;padding:0.8rem;border:none;border-radius:8px;width:100%;font-weight:bold;cursor:pointer;margin-top:1rem}
-.btn-green{background:#16a34a}
-.hidden{display:none}
-table{width:100%;border-collapse:collapse;margin-top:1rem}
-th,td{border:1px solid #e2e8f0;padding:8px;text-align:left;font-size:0.9rem}
-textarea{width:100%;height:300px;margin-top:1rem;font-family:monospace;font-size:0.75rem;padding:1rem}
+body{font-family:Arial;padding:15px;background:#f5f5f5}
+.card{background:white;padding:15px;border-radius:12px;margin-bottom:15px;box-shadow:0 2px 5px #0001}
+input,textarea{width:100%;padding:12px;margin:6px 0;border:1px solid #ccc;border-radius:8px;box-sizing:border-box}
+button{padding:12px;border:none;border-radius:8px;font-weight:bold;cursor:pointer}
+.green{background:#22c55e;color:white;width:100%}
+.black{background:#111827;color:white;width:100%;margin-top:10px}
+label{font-weight:bold;font-size:14px}
 </style>
 </head>
 <body>
 
-<div id="loginBox" class="box">
-<h2 style="text-align:center">🔐 Admin Login</h2>
-<p style="text-align:center;color:#64748b;font-size:0.9rem">Affordable Used Cars Dealership</p>
-<input id="user" placeholder="Username" value="admin">
-<input id="pass" type="password" placeholder="Password">
-<button class="btn" onclick="login()">Login</button>
-<p id="err" style="color:red;text-align:center;margin-top:10px"></p>
-<p style="text-align:center;margin-top:1rem;font-size:0.8rem">Hint: admin / cars2024</p>
-<a href="index.html" style="display:block;text-align:center;margin-top:1rem;color:#1e3a8a">← Back to Site</a>
+<h2>🚗 Dealership Full Admin <button onclick="localStorage.clear();location.reload()" style="float:right;background:#ef4444;color:white;padding:6px 12px;border-radius:6px;">Logout</button></h2>
+
+<div class="card">
+<h3>🏢 Profile & Contact</h3>
+<label>Dealership Name</label><input id="bizName" value="Affordable Used Cars For Sale">
+<label>Tagline</label><input id="tagline" value="Best Prices Always Open - Clean Title">
+<label>Logo / Profile Photo (Upload)</label><input type="file" id="logoFile" accept="image/*"><input id="logoUrl" placeholder="Logo URL">
+<label>Cover / Banner Photo (Upload)</label><input type="file" id="coverFile" accept="image/*"><input id="coverUrl" placeholder="Cover URL">
+<label>Email</label><input id="email" value="affordableusedcarsatlanta2019@gmail.com">
+<label>Phone / WhatsApp</label><input id="phone" value="+1 (740) 530-7194">
+<label>Location</label><input id="location" value="Atlanta, GA">
+<label>Hours</label><input id="hours" value="Always Open">
+<label>Facebook Link</label><input id="fbLink" value="https://tinyurl.com/yh9n6497">
+<label>About Us</label><textarea id="about">Quality affordable used cars with clean titles. Financing available.</textarea>
 </div>
 
-<div id="adminPanel" class="box hidden" style="max-width:900px">
-<div style="display:flex;justify-content:space-between;align-items:center">
-<h2>🚗 Manage Inventory</h2>
-<button onclick="logout()" style="background:#ef4444;color:white;border:none;padding:6px 12px;border-radius:6px;cursor:pointer">Logout</button>
+<div class="card">
+<h3>➕ Add / Edit Car</h3>
+<label>Year</label><input id="year" placeholder="e.g. 2019">
+<label>Make Model</label><input id="makeModel" placeholder="e.g. Kia Rio S Sedan 4D">
+<label>Price</label><input id="price" placeholder="e.g. $2,800">
+<label>Mileage</label><input id="mileage" placeholder="e.g. 136,000">
+<label>Color</label><input id="color" placeholder="e.g. White">
+<label>Car Photo - Upload from Phone</label><input type="file" id="carFile" accept="image/*"><input id="imageUrl" placeholder="Image URL auto-fills">
+<div id="preview"></div>
+<label>Features</label><input id="features" placeholder="Cold AC, Backup Camera">
+<button class="green" onclick="addCar()">+ Add Car</button>
+<table border="1" style="width:100%;margin-top:10px;border-collapse:collapse"><thead><tr><th>Car</th><th>Price</th><th>Action</th></tr></thead><tbody id="carList"></tbody></table>
 </div>
 
-<h3 style="margin-top:1.5rem">Add / Edit Car</h3>
-<input id="cYear" placeholder="Year e.g. 2019">
-<input id="cMake" placeholder="Make Model e.g. Kia Rio S Sedan 4D">
-<input id="cPrice" placeholder="Price e.g. $2,800">
-<input id="cMileage" placeholder="Mileage e.g. 136,000">
-<input id="cColor" placeholder="Color e.g. White">
-<label style="font-weight:bold;">📸 Upload from Phone:</label>
-<input type="file" id="imageFile" accept="image/*" style="margin-bottom:10px;">
-<input type="text" id="imageUrl" placeholder="Image URL (auto-fills after upload)">
-<p id="preview"></p>
-
-<script>
-document.getElementById('imageFile').addEventListener('change', function(e){
-  const file = e.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = function(ev){
-    document.getElementById('imageUrl').value = ev.target.result;
-    document.getElementById('preview').innerHTML = '<img src="'+ev.target.result+'" style="width:100%;max-width:300px;border-radius:10px;margin-top:10px;">';
-  };
-  reader.readAsDataURL(file);
-});
-</script>
-<input id="cFeatures" placeholder="Features e.g. Cold AC, Backup Camera">
-<button class="btn btn-green" onclick="addCar()">+ Add Car</button>
-
-<div id="carList" style="margin-top:1.5rem"></div>
-
-<button class="btn" style="margin-top:2rem;background:#0f172a" onclick="generateHTML()">⚙️ Generate New index.html Code</button>
-<textarea id="output" class="hidden" readonly></textarea>
-<button id="copyBtn" class="btn hidden btn-green" onclick="copyCode()">📋 Copy Code</button>
-<p id="copyMsg" style="text-align:center;color:green;margin-top:10px"></p>
-
-<div style="background:#fef3c7;padding:1rem;border-radius:8px;margin-top:1.5rem;font-size:0.85rem">
-<strong>How to update live site:</strong><br>
-1. Click Generate → Copy Code<br>
-2. Go to GitHub → index.html → Edit → Paste → Commit<br>
-3. Wait 2 mins → Live!
-</div>
+<div class="card">
+<button class="black" onclick="generateCode()">⚙️ Generate New index.html Code (with Profile + Cars)</button>
+<textarea id="outputCode" style="height:200px;display:none;"></textarea>
+<p style="background:#fef3c7;padding:10px;border-radius:8px;"><b>How to update live site:</b><br>1. Tap Generate<br>2. Copy code<br>3. Go to GitHub → index.html → Edit → Paste → Commit<br>4. Wait 2 mins - Done!</p>
 </div>
 
 <script>
-let cars = JSON.parse(localStorage.getItem('cars')) || [
-{year:"2019",make:"Kia Rio S Sedan 4D",price:"$2,800",mileage:"136,000",color:"White",image:"https://images.unsplash.com/photo-1550355291-bbee04a92027?w=600",features:"Automatic • Fuel Efficient"},
-{year:"2018",make:"Dodge Charger SXT",price:"$2,500 Down",mileage:"159,000",color:"Red/Black",image:"https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=600",features:"Cold AC • Heated Seats • Backup Camera"},
-{year:"2016",make:"Jeep Patriot Sport",price:"$3,950",mileage:"82,000",color:"White",image:"https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=600",features:"Very Good Condition"},
-{year:"2020",make:"Jeep Wrangler 2.0L Turbo",price:"$7,800",mileage:"82,000",color:"Gray",image:"https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600",features:"2.0L Turbo • 4x4"}
-];
+// File upload to base64
+function toBase64(fileInput, urlInput, previewId){
+ fileInput.addEventListener('change', e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader(); r.onload=ev=>{
+   urlInput.value=ev.target.result;
+   if(previewId) document.getElementById(previewId).innerHTML='<img src="'+ev.target.result+'" style="width:100%;border-radius:10px">';
+  }; r.readAsDataURL(f);
+ });
+}
+toBase64(document.getElementById('logoFile'), document.getElementById('logoUrl'));
+toBase64(document.getElementById('coverFile'), document.getElementById('coverUrl'));
+toBase64(document.getElementById('carFile'), document.getElementById('imageUrl'), 'preview');
 
-function login(){
-if(document.getElementById('user').value==='admin' && document.getElementById('pass').value==='cars2024'){
-document.getElementById('loginBox').classList.add('hidden');
-document.getElementById('adminPanel').classList.remove('hidden');
-render();
-} else { document.getElementById('err').innerText='Wrong username or password!'; }
-}
-function logout(){ location.reload(); }
-function render(){
-let html='<table><tr><th>Car</th><th>Price</th><th>Action</th></tr>';
-cars.forEach((c,i)=>{
-html+=`<tr><td>${c.year} ${c.make}</td><td>${c.price}</td><td><button onclick="del(${i})" style="background:#ef4444;color:white;border:none;padding:4px 8px;border-radius:4px">Delete</button></td></tr>`;
-});
-html+='</table>';
-document.getElementById('carList').innerHTML=html;
-localStorage.setItem('cars',JSON.stringify(cars));
-}
+let cars = JSON.parse(localStorage.getItem('cars')||'[]');
 function addCar(){
-let car={
-year:document.getElementById('cYear').value,
-make:document.getElementById('cMake').value,
-price:document.getElementById('cPrice').value,
-mileage:document.getElementById('cMileage').value,
-color:document.getElementById('cColor').value,
-image:document.getElementById('cImage').value || 'https://images.unsplash.com/photo-1550355291-bbee04a92027?w=600',
-features:document.getElementById('cFeatures').value
-};
-if(!car.make || !car.price){ alert('Enter Make and Price'); return; }
-cars.push(car); render();
-['cYear','cMake','cPrice','cMileage','cColor','cImage','cFeatures'].forEach(id=>document.getElementById(id).value='');
+ const c={year:year.value, makeModel:makeModel.value, price:price.value, mileage:mileage.value, color:color.value, imageUrl:imageUrl.value, features:features.value};
+ cars.push(c); localStorage.setItem('cars', JSON.stringify(cars)); render();
 }
-function del(i){ if(confirm('Delete?')){ cars.splice(i,1); render(); } }
-function generateHTML(){
-let cards='';
-cars.forEach(c=>{
-cards+=`<div class="card"><img src="${c.image}"><div class="card-body"><h3>${c.year} ${c.make}</h3><div class="price">${c.price}</div><p><strong>MILEAGE:</strong> ${c.mileage} • <strong>COLOR:</strong> ${c.color} • ${c.features}</p><a class="btn" href="https://wa.me/17405307194?text=Hi%20I'm%20interested%20in%20${c.year} ${c.make}">WhatsApp This Car</a></div></div>`;
+function render(){
+ carList.innerHTML=''; cars.forEach((c,i)=>{
+  carList.innerHTML+=`<tr><td>${c.year} ${c.makeModel}</td><td>${c.price}</td><td><button onclick="cars.splice(${i},1);localStorage.setItem('cars',JSON.stringify(cars));render()">Delete</button></td></tr>`;
+ });
+}
+render();
+function generateCode(){
+ // This generates full index.html with your profile edits + cars
+ let carsHtml = cars.map(c=>`
+ <div class="car"><img src="${c.imageUrl}"><h3>${c.year} ${c.makeModel}</h3><p>${c.price} | ${c.mileage} miles | ${c.color}</p><p>${c.features}</p><a href="https://wa.me/${document.getElementById('phone').value.replace(/[^0-9]/g,'')}?text=Hi, I'm interested in ${c.year} ${c.makeModel}">WhatsApp</a></div>`).join('');
+ const full = `<!DOCTYPE html><html><head><title>${bizName.value}</title></head><body>
+ <div style="background:url('${coverUrl.value}');height:200px;background-size:cover"></div>
+ <img src="${logoUrl.value}" style="width:100px;border-radius:50%;margin-top:-50px">
+ <h1>${bizName.value}</h1><p>${tagline.value}</p><p>${location.value} | ${hours.value}</p><p>${email.value} | ${phone.value}</p><p>${about.value}</p>
+ <div>${carsHtml}</div></body></html>`;
+ outputCode.style.display='block'; outputCode.value=full;
+}
+// Load saved profile
+['bizName','tagline','logoUrl','coverUrl','email','phone','location','hours','fbLink','about'].forEach(id=>{
+ const v=localStorage.getItem(id); if(v) document.getElementById(id).value=v;
+ document.getElementById(id).addEventListener('input', e=>localStorage.setItem(id, e.target.value));
 });
-let full=`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Affordable Used Cars</title><style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}body{background:#f8fafc}header{background:#1e3a8a;color:white;padding:1rem;display:flex;justify-content:space-between}.btn{background:#22c55e;color:white;padding:0.6rem 1.2rem;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block}.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:white;padding:3rem 1rem;text-align:center}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;padding:2rem 1rem;max-width:1200px;margin:auto}.card{background:white;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.1)}.card img{width:100%;height:200px;object-fit:cover}.card-body{padding:1rem}.price{color:#16a34a;font-size:1.5rem;font-weight:bold}footer{background:#0f172a;color:white;padding:2rem;text-align:center}</style></head><body><header><h1>🚗 Affordable Used Cars</h1><a class="btn" href="https://wa.me/17405307194">WhatsApp +1 (740) 530-7194</a></header><section class="hero"><h2>Affordable Used Cars - Best Prices Always Open</h2><p>${cars.length} Cars IN STOCK NOW</p><br><a class="btn" href="https://wa.me/17405307194">Chat Now</a></section><section class="grid">${cards}</section><footer><p>WhatsApp: +1 (740) 530-7194 • <a href="admin.html" style="color:#475569">Admin</a></p></footer></body></html>`;
-document.getElementById('output').value=full;
-document.getElementById('output').classList.remove('hidden');
-document.getElementById('copyBtn').classList.remove('hidden');
-}
-function copyCode(){ document.getElementById('output').select(); document.execCommand('copy'); document.getElementById('copyMsg').innerText='✅ Copied! Paste into GitHub index.html'; }
 </script>
 </body>
 </html>
