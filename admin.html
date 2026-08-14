@@ -1,1 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - Affordable Used Cars</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
+body{background:#f1f5f9;padding:1rem}
+.box{max-width:500px;margin:3rem auto;background:white;padding:2rem;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.1)}
+input{width:100%;padding:0.8rem;margin:0.5rem 0;border:1px solid #cbd5e1;border-radius:8px}
+.btn{background:#1e3a8a;color:white;padding:0.8rem;border:none;border-radius:8px;width:100%;font-weight:bold;cursor:pointer;margin-top:1rem}
+.btn-green{background:#16a34a}
+.hidden{display:none}
+table{width:100%;border-collapse:collapse;margin-top:1rem}
+th,td{border:1px solid #e2e8f0;padding:8px;text-align:left;font-size:0.9rem}
+textarea{width:100%;height:300px;margin-top:1rem;font-family:monospace;font-size:0.75rem;padding:1rem}
+</style>
+</head>
+<body>
 
+<div id="loginBox" class="box">
+<h2 style="text-align:center">🔐 Admin Login</h2>
+<p style="text-align:center;color:#64748b;font-size:0.9rem">Affordable Used Cars Dealership</p>
+<input id="user" placeholder="Username" value="admin">
+<input id="pass" type="password" placeholder="Password">
+<button class="btn" onclick="login()">Login</button>
+<p id="err" style="color:red;text-align:center;margin-top:10px"></p>
+<p style="text-align:center;margin-top:1rem;font-size:0.8rem">Hint: admin / cars2024</p>
+<a href="index.html" style="display:block;text-align:center;margin-top:1rem;color:#1e3a8a">← Back to Site</a>
+</div>
+
+<div id="adminPanel" class="box hidden" style="max-width:900px">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<h2>🚗 Manage Inventory</h2>
+<button onclick="logout()" style="background:#ef4444;color:white;border:none;padding:6px 12px;border-radius:6px;cursor:pointer">Logout</button>
+</div>
+
+<h3 style="margin-top:1.5rem">Add / Edit Car</h3>
+<input id="cYear" placeholder="Year e.g. 2019">
+<input id="cMake" placeholder="Make Model e.g. Kia Rio S Sedan 4D">
+<input id="cPrice" placeholder="Price e.g. $2,800">
+<input id="cMileage" placeholder="Mileage e.g. 136,000">
+<input id="cColor" placeholder="Color e.g. White">
+<input id="cImage" placeholder="Image URL">
+<input id="cFeatures" placeholder="Features e.g. Cold AC, Backup Camera">
+<button class="btn btn-green" onclick="addCar()">+ Add Car</button>
+
+<div id="carList" style="margin-top:1.5rem"></div>
+
+<button class="btn" style="margin-top:2rem;background:#0f172a" onclick="generateHTML()">⚙️ Generate New index.html Code</button>
+<textarea id="output" class="hidden" readonly></textarea>
+<button id="copyBtn" class="btn hidden btn-green" onclick="copyCode()">📋 Copy Code</button>
+<p id="copyMsg" style="text-align:center;color:green;margin-top:10px"></p>
+
+<div style="background:#fef3c7;padding:1rem;border-radius:8px;margin-top:1.5rem;font-size:0.85rem">
+<strong>How to update live site:</strong><br>
+1. Click Generate → Copy Code<br>
+2. Go to GitHub → index.html → Edit → Paste → Commit<br>
+3. Wait 2 mins → Live!
+</div>
+</div>
+
+<script>
+let cars = JSON.parse(localStorage.getItem('cars')) || [
+{year:"2019",make:"Kia Rio S Sedan 4D",price:"$2,800",mileage:"136,000",color:"White",image:"https://images.unsplash.com/photo-1550355291-bbee04a92027?w=600",features:"Automatic • Fuel Efficient"},
+{year:"2018",make:"Dodge Charger SXT",price:"$2,500 Down",mileage:"159,000",color:"Red/Black",image:"https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=600",features:"Cold AC • Heated Seats • Backup Camera"},
+{year:"2016",make:"Jeep Patriot Sport",price:"$3,950",mileage:"82,000",color:"White",image:"https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=600",features:"Very Good Condition"},
+{year:"2020",make:"Jeep Wrangler 2.0L Turbo",price:"$7,800",mileage:"82,000",color:"Gray",image:"https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600",features:"2.0L Turbo • 4x4"}
+];
+
+function login(){
+if(document.getElementById('user').value==='admin' && document.getElementById('pass').value==='cars2024'){
+document.getElementById('loginBox').classList.add('hidden');
+document.getElementById('adminPanel').classList.remove('hidden');
+render();
+} else { document.getElementById('err').innerText='Wrong username or password!'; }
+}
+function logout(){ location.reload(); }
+function render(){
+let html='<table><tr><th>Car</th><th>Price</th><th>Action</th></tr>';
+cars.forEach((c,i)=>{
+html+=`<tr><td>${c.year} ${c.make}</td><td>${c.price}</td><td><button onclick="del(${i})" style="background:#ef4444;color:white;border:none;padding:4px 8px;border-radius:4px">Delete</button></td></tr>`;
+});
+html+='</table>';
+document.getElementById('carList').innerHTML=html;
+localStorage.setItem('cars',JSON.stringify(cars));
+}
+function addCar(){
+let car={
+year:document.getElementById('cYear').value,
+make:document.getElementById('cMake').value,
+price:document.getElementById('cPrice').value,
+mileage:document.getElementById('cMileage').value,
+color:document.getElementById('cColor').value,
+image:document.getElementById('cImage').value || 'https://images.unsplash.com/photo-1550355291-bbee04a92027?w=600',
+features:document.getElementById('cFeatures').value
+};
+if(!car.make || !car.price){ alert('Enter Make and Price'); return; }
+cars.push(car); render();
+['cYear','cMake','cPrice','cMileage','cColor','cImage','cFeatures'].forEach(id=>document.getElementById(id).value='');
+}
+function del(i){ if(confirm('Delete?')){ cars.splice(i,1); render(); } }
+function generateHTML(){
+let cards='';
+cars.forEach(c=>{
+cards+=`<div class="card"><img src="${c.image}"><div class="card-body"><h3>${c.year} ${c.make}</h3><div class="price">${c.price}</div><p><strong>MILEAGE:</strong> ${c.mileage} • <strong>COLOR:</strong> ${c.color} • ${c.features}</p><a class="btn" href="https://wa.me/17405307194?text=Hi%20I'm%20interested%20in%20${c.year} ${c.make}">WhatsApp This Car</a></div></div>`;
+});
+let full=`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Affordable Used Cars</title><style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}body{background:#f8fafc}header{background:#1e3a8a;color:white;padding:1rem;display:flex;justify-content:space-between}.btn{background:#22c55e;color:white;padding:0.6rem 1.2rem;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block}.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:white;padding:3rem 1rem;text-align:center}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;padding:2rem 1rem;max-width:1200px;margin:auto}.card{background:white;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.1)}.card img{width:100%;height:200px;object-fit:cover}.card-body{padding:1rem}.price{color:#16a34a;font-size:1.5rem;font-weight:bold}footer{background:#0f172a;color:white;padding:2rem;text-align:center}</style></head><body><header><h1>🚗 Affordable Used Cars</h1><a class="btn" href="https://wa.me/17405307194">WhatsApp +1 (740) 530-7194</a></header><section class="hero"><h2>Affordable Used Cars - Best Prices Always Open</h2><p>${cars.length} Cars IN STOCK NOW</p><br><a class="btn" href="https://wa.me/17405307194">Chat Now</a></section><section class="grid">${cards}</section><footer><p>WhatsApp: +1 (740) 530-7194 • <a href="admin.html" style="color:#475569">Admin</a></p></footer></body></html>`;
+document.getElementById('output').value=full;
+document.getElementById('output').classList.remove('hidden');
+document.getElementById('copyBtn').classList.remove('hidden');
+}
+function copyCode(){ document.getElementById('output').select(); document.execCommand('copy'); document.getElementById('copyMsg').innerText='✅ Copied! Paste into GitHub index.html'; }
+</script>
+</body>
+</html>
