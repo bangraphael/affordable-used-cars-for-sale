@@ -1,2 +1,2 @@
-# affordable-used---cars--atlanta-
- Affordable Used Cars For Sale Atlanta GA - Best Prices Always Open
+# affordable-used-cars-for-sale
+ Affordable Used Cars For Sale- Best Prices Always Open
